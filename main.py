@@ -7,7 +7,10 @@ import uvicorn
 from fastapi import FastAPI, Request
 from orjson import orjson
 
+from config import config
+
 amIFeeding_bp = FastAPI()
+
 
 async def read_file(filename):
     async with aiofiles.open(filename, "r") as file:
@@ -46,12 +49,14 @@ def proxy_ip(request: Request):
     client_ip = forwarded_ip if forwarded_ip else request.client.host
     return client_ip
 
+
 async def am_i_feeding_debug(request: Request):
     beast = False
     mlat = False
     request_ip = proxy_ip(request)
 
-    clients_readsb, clients_mlat = await asyncio.gather(read_file(config.clients_json), read_file(config.clients_mlat_json))
+    clients_readsb, clients_mlat = await asyncio.gather(read_file(config.clients_json),
+                                                        read_file(config.clients_mlat_json))
     for client in clients_readsb:
         if convert_to_ip(client[1]) == request_ip:
             beast = True
