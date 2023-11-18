@@ -4,8 +4,9 @@ import socket
 
 import aiofiles
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Query
 from orjson import orjson
+from typing import Optional
 
 from config import config
 
@@ -50,10 +51,9 @@ def proxy_ip(request: Request):
     return client_ip
 
 
-async def am_i_feeding_debug(request: Request):
+async def am_i_feeding_debug(request_ip):
     beast = False
     mlat = False
-    request_ip = proxy_ip(request)
 
     clients_readsb, clients_mlat = await asyncio.gather(read_file(config.clients_json),
                                                         read_file(config.clients_mlat_json))
@@ -70,12 +70,19 @@ async def am_i_feeding_debug(request: Request):
 
 
 @amIFeeding_bp.api_route('/am_i_feeding', methods=["GET"])
-async def am_i_feeding(request: Request):
-    beast, mlat = await am_i_feeding_debug(request)
+async def am_i_feeding(request: Request, ip: Optional[str] = Query(None)):
+    if ip:
+        request_ip = ip
+    else:
+        request_ip = proxy_ip(request)
+    beast, mlat = await am_i_feeding_debug(request_ip)
     return {"feeding": {"beast": beast, "mlat": mlat}}
 
 
 async def fastapi_start():
-    configuration = uvicorn.Config("modules.app.app:app", host=config.host, port=config.port, loop="auto")
+    configuration = uvicorn.Config(amIFeeding_bp, host=config.host, port=config.port, loop="auto")
     server = uvicorn.Server(configuration)
     await server.serve()
+
+
+asyncio.run(fastapi_start())

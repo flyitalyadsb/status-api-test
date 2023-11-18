@@ -20,9 +20,9 @@ def server_main(parser):
 
 
 def readsb_input(parser):
-    parser.add_argument('--receivers-json',
-                        help="Path to the receivers JSON data file.",
-                        default="/json/ingest/receivers.json")
+    parser.add_argument('--clients-json',
+                        help="Path to the clients JSON data file.",
+                        default="/json/ingest/clients.json")
 
 
 def mlat_server_input(parser):
