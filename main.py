@@ -32,7 +32,7 @@ def convert_to_ip(input_string):
     hostname_match = re.search(r'\b\w+\.\w+\b', input_string)
     if ip_match:
         ip = ip_match.group(0)
-        print(f"IP found: {ip}")
+        #print(f"IP found: {ip}")
     elif hostname_match:
         hostname = hostname_match.group(0)
         try:
@@ -76,8 +76,9 @@ async def am_i_feeding(request: Request, ip: Optional[str] = Query(None)):
     else:
         request_ip = proxy_ip(request)
     beast, mlat = await am_i_feeding_debug(request_ip)
-    return {"feeding": {"beast": beast, "mlat": mlat}}
-
+    result = {"feeding": {"beast": beast, "mlat": mlat}}
+    print(f"ip: {request_ip}, result: {result['feeding']}")
+    return result
 
 async def fastapi_start():
     configuration = uvicorn.Config(amIFeeding_bp, host=config.host, port=config.port, loop="auto")
